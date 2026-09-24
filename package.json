@@ -8,7 +8,7 @@
     "dev:portal": "pnpm --filter @obec/portal dev",
     "dev:crm": "pnpm --filter @obec/crm dev",
     "build": "pnpm --filter @obec/portal build && pnpm --filter @obec/crm build && node scripts/merge-dist.mjs",
-    "typecheck": "pnpm -r exec tsc --noEmit",
+    "typecheck": "pnpm --filter \"./packages/*\" --filter \"./apps/*\" exec tsc --noEmit",
     "test": "pnpm --filter @obec/core test",
     "test:e2e": "pnpm --filter @obec/e2e test",
     "lint": "echo \"lint: skipped in demo\""
