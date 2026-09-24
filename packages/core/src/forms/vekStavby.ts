@@ -13,7 +13,7 @@ export const vekStavbyForm: FormSchema = {
   poplatokEur: 0,
   poplatokPoznamka: 'Bez správneho poplatku.',
   odhadovanyCasMin: 10,
-  pravnyZaklad: 'zákon č. 71/1967 Zb. o správnom konaní',
+  pravnyZaklad: 'zákona č. 71/1967 Zb. o správnom konaní',
   adresat: 'Obecný úrad',
   pdfNazov: 'ziadost-o-potvrdenie-o-veku-stavby',
   infoPoznamka:
@@ -72,6 +72,7 @@ export const vekStavbyForm: FormSchema = {
           type: 'address',
           required: true,
           colSpan: 2,
+          autofillFrom: 'resident.trvalyPobyt',
         },
         {
           id: 'telefon',

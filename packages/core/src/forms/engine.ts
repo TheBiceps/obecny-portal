@@ -215,6 +215,18 @@ export function autofillValue(f: Field, ctx: AutofillContext): unknown {
   return undefined
 }
 
+/** Prázdne je nevyplnené pole aj adresný blok, ktorý nemá ani jednu vyplnenú časť. */
+function jePrazdnaHodnota(v: unknown): boolean {
+  if (v === undefined || v === null || v === '') return true
+  if (Array.isArray(v)) return v.length === 0
+  if (typeof v === 'object') {
+    return Object.values(v as Record<string, unknown>).every(
+      (x) => x === undefined || x === null || x === '',
+    )
+  }
+  return false
+}
+
 export interface AutofillResult {
   values: FormValues
   /** id polí, ktoré boli doplnené automaticky */
@@ -238,9 +250,7 @@ export function applyAutofill(
       if (!f.autofillFrom) continue
       if (moznosti.lenZdroj && !f.autofillFrom.startsWith(moznosti.lenZdroj)) continue
       const existuje = nove[f.id]
-      const jePrazdne =
-        existuje === undefined || existuje === null || existuje === ''
-      if (!jePrazdne && !moznosti.prepisat) continue
+      if (!jePrazdnaHodnota(existuje) && !moznosti.prepisat) continue
       const v = autofillValue(f, ctx)
       if (v === undefined || v === null || v === '') continue
       nove[f.id] = v

@@ -46,13 +46,14 @@ export function Field({
       <div className={cn('flex flex-col gap-1.5', className)}>
         <label htmlFor={inputId} className="text-sm font-medium text-ink">
           {label}
-          {required ? (
+          {required === true ? (
             <span className="ml-1 text-danger" aria-hidden="true">
               *
             </span>
-          ) : (
+          ) : null}
+          {required === false ? (
             <span className="ml-2 text-xs font-normal text-ink-faint">nepovinné</span>
-          )}
+          ) : null}
           {doplnene ? (
             <span className="ml-2 rounded-full bg-primary-soft px-2 py-0.5 text-xs font-normal text-primary-dark">
               vyplnené za vás

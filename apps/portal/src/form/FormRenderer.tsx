@@ -13,6 +13,7 @@ import {
   fieldOptions,
   formatDate,
   formatEur,
+  formatRodneCislo,
   validateForm,
   visibleFields,
   visibleSections,
@@ -322,6 +323,7 @@ function zobrazHodnotu(f: Field, values: FormValues, tenant: TenantConfig) {
   if (v === undefined || v === null || v === '') {
     return <span className="text-ink-faint">Neuvedené</span>
   }
+  if (f.validate === 'rodneCislo') return formatRodneCislo(String(v))
   if (f.type === 'date') return formatDate(String(v))
   if (f.type === 'file') {
     const zoznam = (Array.isArray(v) ? v : []) as AttachmentMeta[]

@@ -78,7 +78,7 @@ export function PoleFormulara(p: PoleProps) {
         <RadioGroup
           legend={pole.label}
           name={pole.id}
-          required={pole.required}
+          required={Boolean(pole.required)}
           helper={pole.helper}
           error={chyba}
           value={String(hodnota ?? '')}
@@ -108,7 +108,7 @@ export function PoleFormulara(p: PoleProps) {
         </legend>
         {pole.helper ? <p className="mb-3 text-sm text-ink-muted">{pole.helper}</p> : null}
         <div id={idPola} tabIndex={-1} className="grid gap-4 sm:grid-cols-2">
-          <Obal label="Ulica" required={pole.required} className="sm:col-span-2">
+          <Obal label="Ulica" required={Boolean(pole.required)} className="sm:col-span-2">
             <Input
               value={a.ulica ?? ''}
               onChange={(e) => uprav('ulica', e.target.value)}
@@ -128,14 +128,14 @@ export function PoleFormulara(p: PoleProps) {
               onChange={(e) => uprav('orientacneCislo', e.target.value)}
             />
           </Obal>
-          <Obal label="Obec" required={pole.required}>
+          <Obal label="Obec" required={Boolean(pole.required)}>
             <Input
               value={a.obec ?? ''}
               onChange={(e) => uprav('obec', e.target.value)}
               autoComplete="address-level2"
             />
           </Obal>
-          <Obal label="PSČ" required={pole.required} helper="Päť číslic, napríklad 900 27.">
+          <Obal label="PSČ" required={Boolean(pole.required)} helper="Päť číslic, napríklad 900 27.">
             <Input
               value={a.psc ?? ''}
               onChange={(e) => uprav('psc', e.target.value)}
@@ -157,7 +157,7 @@ export function PoleFormulara(p: PoleProps) {
     return (
       <Obal
         label={pole.label}
-        required={pole.required}
+        required={Boolean(pole.required)}
         helper={pole.helper}
         error={chyba}
         htmlFor={idPola}
@@ -175,7 +175,7 @@ export function PoleFormulara(p: PoleProps) {
     return (
       <Obal
         label={pole.label}
-        required={pole.required}
+        required={Boolean(pole.required)}
         helper={pole.helper}
         error={chyba}
         doplnene={doplnene}
@@ -202,7 +202,7 @@ export function PoleFormulara(p: PoleProps) {
     return (
       <Obal
         label={pole.label}
-        required={pole.required}
+        required={Boolean(pole.required)}
         helper={pole.helper}
         error={chyba}
         htmlFor={idPola}
@@ -224,7 +224,7 @@ export function PoleFormulara(p: PoleProps) {
   return (
     <Obal
       label={pole.label}
-      required={pole.required}
+      required={Boolean(pole.required)}
       helper={pole.helper}
       error={chyba}
       doplnene={doplnene}

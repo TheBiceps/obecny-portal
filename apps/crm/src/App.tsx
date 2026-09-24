@@ -2,6 +2,7 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ToastProvider } from '@obec/ui'
 import { TenantProvider } from './app/tenant'
 import { AuthProvider } from './app/auth'
+import { NazovStranky } from './app/NazovStranky'
 import { Layout } from './components/Layout'
 import { ChranenaCesta } from './components/ChranenaCesta'
 import { Prihlasenie } from './pages/Prihlasenie'
@@ -15,6 +16,7 @@ export function App() {
       <AuthProvider>
         <ToastProvider>
           <HashRouter>
+            <NazovStranky />
             <Routes>
               <Route path="/prihlasenie" element={<Prihlasenie />} />
               <Route

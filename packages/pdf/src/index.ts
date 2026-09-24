@@ -10,6 +10,7 @@ import {
   fieldOptions,
   formatDate,
   formatEur,
+  formatRodneCislo,
   isVisible,
   visiblePrilohy,
   visibleSections,
@@ -128,6 +129,7 @@ function hodnotaPola(
   if (v === undefined || v === null || v === '') return 'Neuvedené'
 
   if (f.type === 'checkbox' || f.type === 'consent') return v ? 'Áno' : 'Nie'
+  if (f.validate === 'rodneCislo') return formatRodneCislo(String(v))
   if (f.type === 'date') return formatDate(String(v))
   if (f.type === 'file') {
     const zoznam = Array.isArray(v) ? v : []

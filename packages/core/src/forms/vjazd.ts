@@ -14,7 +14,7 @@ export const vjazdForm: FormSchema = {
   poplatokPoznamka:
     'Správny poplatok 30 € uhradíte pri podaní. Doklad o úhrade priložíte k žiadosti.',
   odhadovanyCasMin: 8,
-  pravnyZaklad: 'zákon č. 160/1996 Zb. v znení neskorších predpisov',
+  pravnyZaklad: 'zákona č. 160/1996 Zb. v znení neskorších predpisov',
   adresat: 'Obecný úrad',
   pdfNazov: 'ziadost-o-povolenie-na-vjazd',
   infoPoznamka:
@@ -74,6 +74,7 @@ export const vjazdForm: FormSchema = {
           type: 'address',
           required: true,
           colSpan: 2,
+          autofillFrom: 'resident.trvalyPobyt',
           helper: 'Obec, ulica a PSČ podľa trvalého pobytu alebo sídla.',
         },
         {
