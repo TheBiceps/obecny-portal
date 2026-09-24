@@ -66,7 +66,13 @@ export function Table({
   className?: string
 }) {
   return (
-    <div className="overflow-x-auto">
+    // Oblasť sa dá posúvať aj klávesnicou, preto má tabIndex a vlastný popis.
+    <div
+      className="overflow-x-auto"
+      tabIndex={0}
+      role="region"
+      aria-label={popis}
+    >
       <table className={cn('w-full min-w-[680px] border-collapse text-sm', className)}>
         <caption className="sr-only">{popis}</caption>
         {children}
