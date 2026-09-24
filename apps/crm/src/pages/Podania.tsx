@@ -341,9 +341,12 @@ export function Podania() {
                   >
                     <Td>
                       {s.residentId ? (
-                        <span className="inline-flex items-center gap-2">
+                        <span className="flex flex-col items-start gap-1">
                           <Badge ton="neutral">Registrovaný</Badge>
-                          <span className="text-xs text-ink-faint">
+                          <span
+                            className="font-mono text-xs text-ink-faint"
+                            title={`Identifikátor občana ${s.residentId}`}
+                          >
                             {s.residentId.slice(0, 8)}
                           </span>
                         </span>

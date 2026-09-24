@@ -32,10 +32,22 @@ pnpm dev:crm      # http://localhost:5174
 Ďalšie príkazy:
 
 ```bash
-pnpm typecheck    # kontrola typov vo všetkých balíkoch
+pnpm typecheck    # kontrola typov v aplikáciách a balíkoch
 pnpm test         # testy jadra vo Vitest
 pnpm build        # zostavenie oboch aplikácií do priečinka dist
+pnpm test:e2e     # priechodný test v Playwrighte, vyžaduje predchádzajúci build
 ```
+
+Pri prvom spustení koncového testu doinštalujte prehliadač:
+
+```bash
+pnpm --filter @obec/e2e exec playwright install chromium
+```
+
+Koncový test prejde celý hlavný scenár: registrácia občana, pridanie
+nehnuteľnosti, vyplnenie žiadosti s predvyplnením údajov, odoslanie,
+prihlásenie do CRM, nájdenie podania, zmena stavu a vymazanie.
+Podrobnosti sú v `e2e/README.md`.
 
 ## Štruktúra
 

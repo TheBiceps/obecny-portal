@@ -283,7 +283,7 @@ function VyberNehnutelnosti({
               />
               <span className="min-w-0">
                 <span className="block text-sm font-medium text-ink">
-                  {n.nazov ?? TYP_NEHNUTELNOSTI_LABEL[n.typ]}
+                  {n.nazov?.trim() || TYP_NEHNUTELNOSTI_LABEL[n.typ]}
                 </span>
                 <span className="block text-sm text-ink-muted">
                   {n.adresa.ulica} {n.adresa.supisneCislo ?? ''}, parcela {n.parcelaCislo},

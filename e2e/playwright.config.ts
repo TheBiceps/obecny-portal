@@ -12,19 +12,20 @@ export default defineConfig({
   retries: 0,
   reporter: [['list']],
   use: {
-    baseURL: 'http://localhost:4180',
+    baseURL: 'http://localhost:4180/obecny-portal/',
     trace: 'retain-on-failure',
+    viewport: { width: 1280, height: 1600 },
   },
   webServer: {
-    command: 'npx --yes serve ../dist -l 4180',
-    url: 'http://localhost:4180',
+    command: 'node server.mjs',
+    url: 'http://localhost:4180/obecny-portal/',
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,
   },
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 1600 } },
     },
   ],
 })
