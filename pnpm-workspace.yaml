@@ -1,0 +1,8 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# esbuild dodáva hotovú binárku pre danú platformu,
+# jeho inštalačný skript preto povoľujeme bez obáv.
+allowBuilds:
+  esbuild: true

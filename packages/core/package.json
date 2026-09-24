@@ -1,0 +1,23 @@
+{
+  "name": "@obec/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./forms": "./src/forms/index.ts",
+    "./tenants": "./src/tenant/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8",
+    "typescript": "^5.6.3"
+  }
+}

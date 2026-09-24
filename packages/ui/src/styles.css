@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --c-primary: 30 64 175;
+    --c-primary-dark: 21 47 128;
+    --c-primary-soft: 230 238 253;
+    --c-accent: 21 128 61;
+    --c-canvas: 246 248 251;
+    --c-surface: 255 255 255;
+    --c-line: 209 217 228;
+    --c-ink: 17 24 39;
+    --c-ink-muted: 71 85 105;
+    --c-ink-faint: 100 116 139;
+    --c-danger: 179 38 30;
+    --c-danger-soft: 253 235 233;
+    --c-success: 21 128 61;
+    --c-success-soft: 233 246 238;
+    --c-warning: 146 64 14;
+    --c-warning-soft: 253 243 226;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display text-ink;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+
+  :focus-visible {
+    outline: 3px solid rgb(var(--c-primary));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  [data-autofilled='true'] {
+    background-color: rgb(var(--c-primary-soft));
+  }
+
+  ::placeholder {
+    color: rgb(var(--c-ink-faint));
+  }
+}
+
+@layer components {
+  .preskocit-odkaz {
+    @apply sr-only;
+  }
+  .preskocit-odkaz:focus {
+    @apply not-sr-only fixed left-4 top-4 z-50 rounded-control bg-primary px-4 py-2 text-white shadow-pop;
+  }
+}
+
+@media print {
+  .netlacit { display: none !important; }
+  body { background: #fff; font-size: 11pt; }
+  .tlac-strana { box-shadow: none !important; border: 0 !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
