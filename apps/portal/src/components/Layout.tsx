@@ -33,8 +33,8 @@ export function Layout() {
               src={`${import.meta.env.BASE_URL}${tenant.branding.erbSrc}`}
               alt={tenant.branding.erbAlt}
               className="h-10 w-auto"
-              width={34}
-              height={40}
+              width={426}
+              height={512}
             />
             <span className="leading-tight">
               <span className="block font-display text-base font-semibold text-ink">

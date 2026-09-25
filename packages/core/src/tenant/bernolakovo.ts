@@ -26,7 +26,7 @@ export const bernolakovo: TenantConfig = {
     primary: '#1E40AF',
     primaryDark: '#152F80',
     accent: '#15803D',
-    erbSrc: 'erb-bernolakovo.svg',
+    erbSrc: 'erb-bernolakovo.png',
     erbAlt: 'Erb obce Bernolákovo',
   },
   povoleneFormulare: ['vjazd-160-1996', 'potvrdenie-vek-stavby'],

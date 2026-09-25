@@ -74,8 +74,8 @@ export function Prihlasenie() {
             src={`${import.meta.env.BASE_URL}${tenant.branding.erbSrc}`}
             alt={tenant.branding.erbAlt}
             className="h-14 w-auto"
-            width={44}
-            height={56}
+            width={426}
+            height={512}
           />
           <div>
             <p className="text-sm font-medium text-ink-muted">{tenant.nazov}</p>
