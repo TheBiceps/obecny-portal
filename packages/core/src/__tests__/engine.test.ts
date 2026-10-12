@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  allVisibleFields,
   applyAutofill,
   buildZodSchema,
   emptyValues,
@@ -12,6 +13,10 @@ import {
 } from '../forms/engine'
 import { vjazdForm } from '../forms/vjazd'
 import { vekStavbyForm } from '../forms/vekStavby'
+import { predlzenieUzemnehoRozhodnutiaForm } from '../forms/predlzenieUzemnehoRozhodnutia'
+import { predlzenieStavebnehoPovoleniaForm } from '../forms/predlzenieStavebnehoPovolenia'
+import { supisneCisloForm } from '../forms/supisneCislo'
+import { pasportStavbyForm } from '../forms/pasportStavby'
 import { bernolakovo } from '../tenant/bernolakovo'
 import type { Property, Resident } from '../types'
 
@@ -289,5 +294,55 @@ describe('fieldOptions', () => {
     const sekcia = vjazdForm.sections.find((s) => s.id === 'stavba')!
     const pole = sekcia.fields.find((f) => f.id === 'katastralneUzemie')!
     expect(fieldOptions(pole, bernolakovo)).toEqual([{ value: 'Bernolákovo', label: 'Bernolákovo' }])
+  })
+})
+
+describe('nové tlačivá obce', () => {
+  it('splnomocnený zástupca sa zobrazí až po zaškrtnutí', () => {
+    const polia = (hodnoty: Record<string, unknown>) =>
+      allVisibleFields(predlzenieStavebnehoPovoleniaForm, hodnoty).map((f) => f.id)
+
+    expect(polia({})).not.toContain('zastupcaNazov')
+    expect(polia({ maZastupcu: true })).toContain('zastupcaNazov')
+    expect(polia({ maZastupcu: true })).toContain('zastupcaTelefon')
+  })
+
+  it('korešpondenčná adresa sa pýta len vtedy, keď je iná', () => {
+    const polia = (hodnoty: Record<string, unknown>) =>
+      allVisibleFields(predlzenieUzemnehoRozhodnutiaForm, hodnoty).map((f) => f.id)
+
+    expect(polia({})).not.toContain('korespondencnaAdresa')
+    expect(polia({ maInuKorespondencnuAdresu: true })).toContain('korespondencnaAdresa')
+  })
+
+  it('sprístupnenie informácií je povinná voľba', () => {
+    const chyby = validateForm(pasportStavbyForm, emptyValues(pasportStavbyForm))
+    expect(chyby.map((c) => c.fieldId)).toContain('spristupnenieInformacii')
+  })
+
+  it('žiadosť o súpisné číslo pýta kolaudačné rozhodnutie a zameranie adresného bodu', () => {
+    const chyby = validateForm(supisneCisloForm, emptyValues(supisneCisloForm)).map(
+      (c) => c.fieldId,
+    )
+    expect(chyby).toContain('kolaudacneRozhodnutie')
+    expect(chyby).toContain('zameranieAdresnehoBodu')
+  })
+
+  it('predvyplnenie z nehnuteľnosti funguje aj v nových tlačivách', () => {
+    const nehnutelnost = {
+      parcelaCislo: '4410/2',
+      katastralneUzemie: 'Bernolákovo',
+      nazovStavby: 'Skladová hala',
+      adresa: { ulica: 'Hospodárska' },
+    }
+    const vysledok = applyAutofill(
+      pasportStavbyForm,
+      emptyValues(pasportStavbyForm),
+      { tenant: bernolakovo, property: nehnutelnost as never },
+      { lenZdroj: 'property' },
+    )
+    expect(vysledok.values.parcelyCislo).toBe('4410/2')
+    expect(vysledok.values.katastralneUzemie).toBe('Bernolákovo')
+    expect(vysledok.values.ulica).toBe('Hospodárska')
   })
 })

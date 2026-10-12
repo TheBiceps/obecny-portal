@@ -101,3 +101,16 @@ export const STAV_POUZIVATELA_LABEL: Record<string, string> = {
   pozvany: 'Pozvaný',
   deaktivovany: 'Deaktivovaný',
 }
+
+/**
+ * Jednotný popis poplatku pre celé rozhranie.
+ * Rozlišuje tri prípady: pevná suma, bez poplatku a suma, ktorú určí úrad.
+ */
+export function popisPoplatku(schema: {
+  poplatokEur: number
+  poplatokUrcujeUrad?: boolean
+}): string {
+  if (schema.poplatokUrcujeUrad) return 'Poplatok určí úrad'
+  if (schema.poplatokEur > 0) return `Poplatok ${formatEur(schema.poplatokEur)}`
+  return 'Bez poplatku'
+}

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { Alert, Button, Card, EmptyState, Field, Input, PageHeader, Select } from '@obec/ui'
-import { formatEur, formsForTenant, type FormSchema } from '@obec/core'
+import { formatEur, formsForTenant, popisPoplatku, type FormSchema } from '@obec/core'
 import { useTenant } from '../app/tenant'
 import { useAuth } from '../app/auth'
 
@@ -131,7 +131,7 @@ function FormularKarta({ schema }: { schema: FormSchema }) {
       </div>
 
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-muted">
-        <span>{schema.poplatokEur > 0 ? `Poplatok ${formatEur(schema.poplatokEur)}` : 'Bez poplatku'}</span>
+        <span>{popisPoplatku(schema)}</span>
         <span>Vyplnenie približne {schema.odhadovanyCasMin} minút</span>
       </div>
 

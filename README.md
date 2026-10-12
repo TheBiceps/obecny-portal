@@ -60,6 +60,24 @@ packages/pdf     generovanie PDF s vloženým písmom pre slovenskú diakritiku
 docs/            plán, brief pre agentov, zdrojové tlačivo obce
 ```
 
+## Formuláre obce
+
+Portál má zapnutých sedem formulárov v troch kategóriách:
+
+| Formulár | Kategória | Poplatok |
+| --- | --- | --- |
+| Žiadosť o povolenie na vjazd | Doprava a komunikácie | 30 € |
+| Žiadosť o vydanie potvrdenia o veku stavby | Stavby a pozemky | bez poplatku |
+| Návrh na predĺženie platnosti územného rozhodnutia o umiestnení stavby | Stavby a pozemky | 20 € |
+| Žiadosť o predĺženie platnosti stavebného povolenia | Stavby a pozemky | určí úrad |
+| Žiadosť o predĺženie termínu dokončenia stavby | Stavby a pozemky | určí úrad |
+| Žiadosť o potvrdenie pasportu stavby | Stavby a pozemky | určí úrad |
+| Žiadosť o určenie súpisného a orientačného čísla a zápis adresného bodu | Adresy a súpisné čísla | určí úrad |
+
+Niektoré tlačivá majú na papieri sumu poplatku prázdnu, dopĺňa ju pokladňa obce
+podľa sadzobníka. Schéma to zachytáva príznakom `poplatokUrcujeUrad: true`
+a portál potom píše „Poplatok určí úrad“ namiesto „Bez poplatku“.
+
 ## Ako pridať ďalší formulár
 
 Formuláre sú dáta, nie kód. Nová žiadosť je jeden nový súbor.
@@ -72,6 +90,8 @@ Formuláre sú dáta, nie kód. Nová žiadosť je jeden nový súbor.
    Pole môže mať:
    * `required`, `helper`, `placeholder`, `maxLength`, `colSpan`
    * `validate`: `email | telefon | psc | ico | rodneCislo | rok | cisloOp`
+   * poplatok: `poplatokEur` pre pevnú sumu, prípadne `poplatokUrcujeUrad: true`,
+     keď sumu dopĺňa úrad
    * `visibleIf`: podmienka `{ field, equals | oneOf | isTruthy }`, prípadne `{ and: [...] }` alebo `{ or: [...] }`
    * `autofillFrom`: `resident.<cesta>`, `property.<cesta>`, `tenant.<cesta>` alebo `dnes`
    * `optionsFromTenant: 'katastralneUzemia'` pre zoznam z konfigurácie obce

@@ -12,8 +12,8 @@ import {
   emptyValues,
   fieldOptions,
   formatDate,
-  formatEur,
   formatRodneCislo,
+  popisPoplatku,
   validateForm,
   visibleFields,
   visibleSections,
@@ -281,10 +281,9 @@ function Kontrola({
         <p className="mt-1 text-ink-muted">
           Prejdite si údaje pred odoslaním. Ktorúkoľvek časť môžete ešte upraviť.
         </p>
-        {schema.poplatokEur > 0 ? (
+        {schema.poplatokEur > 0 || schema.poplatokUrcujeUrad ? (
           <p className="mt-3 rounded-control bg-canvas p-3 text-sm text-ink">
-            Správny poplatok: <strong>{formatEur(schema.poplatokEur)}</strong>.{' '}
-            {schema.poplatokPoznamka}
+            <strong>{popisPoplatku(schema)}</strong>. {schema.poplatokPoznamka}
           </p>
         ) : null}
       </Card>

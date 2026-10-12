@@ -102,6 +102,11 @@ export interface FormSchema {
   kategoria: string
   /** poplatok v eurách, 0 znamená bez poplatku */
   poplatokEur: number
+  /**
+   * Niektoré tlačivá majú sumu poplatku prázdnu, dopĺňa ju pokladňa obce
+   * podľa sadzobníka. Vtedy nesmieme tvrdiť, že podanie je bez poplatku.
+   */
+  poplatokUrcujeUrad?: boolean
   poplatokPoznamka?: string
   odhadovanyCasMin: number
   pravnyZaklad: string

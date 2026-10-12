@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Clock, FileEdit, ListChecks, MapPin, Search } from 'lucide-react'
 import { Card } from '@obec/ui'
-import { formatEur, formsForTenant } from '@obec/core'
+import { formsForTenant, popisPoplatku } from '@obec/core'
 import { useTenant } from '../app/tenant'
 import { useAuth } from '../app/auth'
 
@@ -77,7 +77,7 @@ export function Domov() {
                   <h3 className="font-semibold text-ink">{f.nazov}</h3>
                   <p className="flex-1 text-sm text-ink-muted">{f.kratkyPopis}</p>
                   <p className="text-sm font-medium text-ink">
-                    {f.poplatokEur === 0 ? 'Bez poplatku' : formatEur(f.poplatokEur)}
+                    {popisPoplatku(f)}
                   </p>
                   <Link
                     to={`/formular/${f.id}`}

@@ -205,6 +205,8 @@ export async function vytvorPdfPodania(vstup: PdfVstup): Promise<Uint8Array> {
   text(k, `Dátum prijatia: ${formatDate(podanie.prijateAt)}`, { velkost: 10 })
   if (schema.poplatokEur > 0) {
     text(k, `Správny poplatok: ${formatEur(schema.poplatokEur)}`, { velkost: 10 })
+  } else if (schema.poplatokUrcujeUrad) {
+    text(k, 'Správny poplatok: určí úrad podľa sadzobníka', { velkost: 10 })
   }
   ciara(k, 8, 12)
 

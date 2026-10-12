@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Alert, Badge, Card, Spinner } from '@obec/ui'
 import {
   formatEur,
+  popisPoplatku,
   getFormSchema,
   type AttachmentMeta,
   type FormValues,
@@ -94,7 +95,7 @@ export function Formular() {
         <p className="mt-2 max-w-prose text-ink-muted">{schema.kratkyPopis}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <Badge ton="primary">
-            {schema.poplatokEur > 0 ? `Poplatok ${formatEur(schema.poplatokEur)}` : 'Bez poplatku'}
+            {popisPoplatku(schema)}
           </Badge>
           <Badge>Vyplnenie približne {schema.odhadovanyCasMin} minút</Badge>
           <Badge>Podľa {schema.pravnyZaklad}</Badge>

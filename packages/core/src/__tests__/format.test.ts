@@ -6,6 +6,7 @@ import {
   formatDateTime,
   formatEur,
   formatVelkost,
+  popisPoplatku,
 } from '../format'
 
 describe('formatDate', () => {
@@ -69,5 +70,15 @@ describe('formatVelkost', () => {
 describe('buildCisloPodania', () => {
   it('vráti tvar BER-2026-000123 a odstráni diakritiku', () => {
     expect(buildCisloPodania('Bernolákovo', 2026, 123)).toBe('BER-2026-000123')
+  })
+})
+
+describe('popisPoplatku', () => {
+  it('popíše pevnú sumu, bezplatné podanie aj poplatok, ktorý určí úrad', () => {
+    expect(popisPoplatku({ poplatokEur: 30 })).toBe('Poplatok 30 €')
+    expect(popisPoplatku({ poplatokEur: 0 })).toBe('Bez poplatku')
+    expect(popisPoplatku({ poplatokEur: 0, poplatokUrcujeUrad: true })).toBe(
+      'Poplatok určí úrad',
+    )
   })
 })

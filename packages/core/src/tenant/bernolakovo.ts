@@ -29,6 +29,14 @@ export const bernolakovo: TenantConfig = {
     erbSrc: 'erb-bernolakovo.png',
     erbAlt: 'Erb obce Bernolákovo',
   },
-  povoleneFormulare: ['vjazd-160-1996', 'potvrdenie-vek-stavby'],
+  povoleneFormulare: [
+    'vjazd-160-1996',
+    'potvrdenie-vek-stavby',
+    'predlzenie-uzemneho-rozhodnutia',
+    'predlzenie-stavebneho-povolenia',
+    'predlzenie-terminu-dokoncenia',
+    'supisne-orientacne-cislo',
+    'pasport-stavby',
+  ],
   predvolenaAdresa: { obec: 'Bernolákovo', psc: '900 27' },
 }

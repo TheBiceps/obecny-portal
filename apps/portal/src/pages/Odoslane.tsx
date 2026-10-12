@@ -125,6 +125,12 @@ export function Odoslane() {
                 {schema.poplatokPoznamka ? `. ${schema.poplatokPoznamka}` : '.'}
               </p>
             ) : null}
+            {schema.poplatokUrcujeUrad ? (
+              <p>
+                {schema.poplatokPoznamka ??
+                  'Výšku správneho poplatku určí úrad podľa sadzobníka pri podaní žiadosti.'}
+              </p>
+            ) : null}
             {schema.infoPoznamka ? <p>{schema.infoPoznamka}</p> : null}
             <div>
               <p className="font-medium text-ink">Kde a kedy si potvrdenie prevziať</p>
