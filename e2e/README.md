@@ -19,21 +19,15 @@ treba ho spustiť ručne pred každým behom testu (ak sa zdrojový kód zmenil)
 
 ## Základná cesta aplikácie
 
-Obe aplikácie (`apps/portal`, `apps/crm`) sa štandardne zostavujú so
-základnou cestou `/obecny-portal/` (portál) a `/obecny-portal/crm/` (CRM),
-presne tak, ako bežia po nasadení na GitHub Pages. Zostavené `index.html`
-preto odkazuje na skripty a štýly absolútnou cestou začínajúcou
-`/obecny-portal/`.
+Predvolene sa obe aplikácie zostavujú do koreňa, portál na `/` a CRM na `/crm/`,
+presne tak, ako bežia na Cloudflare Pages. Test preto používa vlastný malý
+statický server (`server.mjs`), ktorý obsah `../dist` sprístupní na porte `4180`
+v koreni. Server spúšťa Playwright sám (pozri `webServer` v `playwright.config.ts`),
+netreba ho spúšťať ručne.
 
-Namiesto prebudovania aplikácií s inou základnou cestou (čo by testovalo iný
-build, než aký sa nasadzuje) tento test používa vlastný malý statický server
-(`server.mjs`), ktorý obsah `../dist` sprístupní presne na ceste
-`/obecny-portal/` na porte `4180`. Toto sa ukázalo ako spoľahlivejšie než
-bežný nástroj `serve`, ktorý vie sprístupniť priečinok len na koreňovej ceste
-domény, čo pre CRM v podpriečinku `crm/` s absolútnymi odkazmi nefunguje.
-
-Server v `server.mjs` spúšťa Playwright sám (pozri `webServer` v
-`playwright.config.ts`), netreba ho spúšťať ručne.
+Pre nasadenie do podpriečinka, napríklad na GitHub Pages, sa cesty prepíšu
+premennými `VITE_BASE_PORTAL` a `VITE_BASE_CRM` pri builde. Robí to
+workflow `.github/workflows/deploy.yml`.
 
 ## Spustenie testu
 

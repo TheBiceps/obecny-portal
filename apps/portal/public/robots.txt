@@ -1,0 +1,4 @@
+# Ukážková verzia portálu. Nechceme, aby sa objavila vo vyhľadávačoch
+# a zamieňala si ju niekto za oficiálnu stránku obce.
+User-agent: *
+Disallow: /

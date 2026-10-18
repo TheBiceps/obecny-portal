@@ -1,11 +1,9 @@
 /**
  * Malý statický server pre e2e testy.
  *
- * Obe aplikácie sa zostavujú so základnou cestou `/obecny-portal/`
- * (`apps/portal` na `/obecny-portal/`, `apps/crm` na `/obecny-portal/crm/`),
- * pretože presne takto bežia aj po nasadení na GitHub Pages. Namiesto
- * prebudovania aplikácií s inou základnou cestou preto tento server
- * sprístupní obsah priečinka `../dist` presne na ceste `/obecny-portal/`,
+ * Predvolene sa obe aplikácie zostavujú do koreňa (`apps/portal` na `/`,
+ * `apps/crm` na `/crm/`), presne tak, ako bežia na Cloudflare Pages.
+ * Tento server preto sprístupní obsah priečinka `../dist` v koreni,
  * aby sedeli absolútne odkazy na skripty a štýly vo vygenerovanom `index.html`.
  */
 import { createServer } from 'node:http'
@@ -14,7 +12,7 @@ import { extname, join, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const KOREN = fileURLToPath(new URL('../dist', import.meta.url))
-const PREDPONA = '/obecny-portal/'
+const PREDPONA = '/'
 const PORT = 4180
 
 const TYPY_OBSAHU = {

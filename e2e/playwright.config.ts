@@ -12,13 +12,13 @@ export default defineConfig({
   retries: 0,
   reporter: [['list']],
   use: {
-    baseURL: 'http://localhost:4180/obecny-portal/',
+    baseURL: 'http://localhost:4180/',
     trace: 'retain-on-failure',
     viewport: { width: 1280, height: 1600 },
   },
   webServer: {
     command: 'node server.mjs',
-    url: 'http://localhost:4180/obecny-portal/',
+    url: 'http://localhost:4180/',
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,
   },
