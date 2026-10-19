@@ -15,6 +15,7 @@ export const supisneCisloForm: FormSchema = {
   odhadovanyCasMin: 8,
   pravnyZaklad: 'zákona č. 125/2015 Z. z. o registri adries a vyhlášky č. 31/2003 Z. z.',
   adresat: 'Obecný úrad',
+  rolaRiesitela: 'referent_adries',
   pdfNazov: 'ziadost-o-urcenie-supisneho-a-orientacneho-cisla',
   infoPoznamka:
     'Žiadosť vychádza z vyhlášky č. 31/2003 Z. z. o označovaní ulíc a číslovaní stavieb, zo zákona č. 125/2015 Z. z. o registri adries a z vyhlášky č. 142/2015 Z. z.',

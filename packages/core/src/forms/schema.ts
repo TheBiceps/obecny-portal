@@ -1,3 +1,5 @@
+import type { RolaRiesitela } from '../types'
+
 /**
  * Formát definície formulára.
  * Formuláre sú dáta, nie kód, takže ďalšia obec pridá vlastný formulár
@@ -112,6 +114,8 @@ export interface FormSchema {
   pravnyZaklad: string
   /** komu je žiadosť adresovaná, dopĺňa sa z konfigurácie obce */
   adresat: string
+  /** agenda úradu, ktorá podanie vybavuje, podľa nej sa podanie prideľuje */
+  rolaRiesitela: RolaRiesitela
   sections: Section[]
   prilohy: PrilohaInfo[]
   infoPoznamka?: string

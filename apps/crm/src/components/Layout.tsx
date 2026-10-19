@@ -2,18 +2,26 @@ import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { FileText, LogOut, Menu, Users, X } from 'lucide-react'
 import { Button, SkipLink, cn } from '@obec/ui'
+import { can } from '@obec/core'
 import { useTenant } from '../app/tenant'
 import { useAuth } from '../app/auth'
 
 const ODKAZY = [
-  { to: '/podania', text: 'Prijaté podania', ikona: FileText },
-  { to: '/pouzivatelia', text: 'Používatelia', ikona: Users },
+  { to: '/podania', text: 'Prijaté podania', ikona: FileText, pravo: null },
+  {
+    to: '/pouzivatelia',
+    text: 'Používatelia',
+    ikona: Users,
+    pravo: 'pouzivatelia.spravovat' as const,
+  },
 ]
 
 export function Layout() {
   const { tenant } = useTenant()
   const { uzivatel, odhlasit } = useAuth()
   const [otvorene, setOtvorene] = useState(false)
+  // Referent sa k správe používateľov nedostane, odkaz mu preto neponúkame.
+  const odkazy = ODKAZY.filter((o) => !o.pravo || can(uzivatel?.role, o.pravo))
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -37,7 +45,7 @@ export function Layout() {
           </Link>
 
           <nav aria-label="Hlavné menu" className="hidden items-center gap-1 sm:flex">
-            {ODKAZY.map((o) => (
+            {odkazy.map((o) => (
               <NavLink
                 key={o.to}
                 to={o.to}
@@ -78,7 +86,7 @@ export function Layout() {
         {otvorene ? (
           <nav id="menu-mobil" aria-label="Hlavné menu" className="border-t border-line px-4 sm:hidden">
             <ul className="flex flex-col">
-              {ODKAZY.map((o) => (
+              {odkazy.map((o) => (
                 <li key={o.to}>
                   <NavLink
                     to={o.to}

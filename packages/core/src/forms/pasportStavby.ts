@@ -16,6 +16,7 @@ export const pasportStavbyForm: FormSchema = {
   pravnyZaklad:
     'vyhlášky č. 453/2000 Z. z., ktorou sa vykonávajú niektoré ustanovenia stavebného zákona',
   adresat: 'Obecný úrad',
+  rolaRiesitela: 'referent_stavebny',
   pdfNazov: 'ziadost-o-potvrdenie-pasportu-stavby',
   infoPoznamka:
     'Pasport stavby sa predkladá v dvoch vyhotoveniach, spracovaný podľa § 29 vyhlášky č. 453/2000 Z. z.',

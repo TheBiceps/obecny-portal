@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Download, Printer } from 'lucide-react'
 import {
+  Alert,
   Badge,
   Button,
   Card,
@@ -23,6 +24,7 @@ import {
   formatRodneCislo,
   formatVelkost,
   getFormSchema,
+  ROLA_LABEL,
   STAV_LABEL,
   TYP_NEHNUTELNOSTI_LABEL,
   visibleFields,
@@ -32,6 +34,7 @@ import {
   type FormSchema,
   type Property,
   type Resident,
+  type StaffUser,
   type Submission,
   type SubmissionStatus,
 } from '@obec/core'
@@ -53,6 +56,7 @@ const AUDIT_LABEL: Record<AuditAction, string> = {
   zmena_stavu: 'Zmena stavu',
   stiahnute_pdf: 'Stiahnuté PDF',
   vymazane: 'Vymazané',
+  pridelene: 'Podanie pridelené',
 }
 
 const STAVY: SubmissionStatus[] = ['prijate', 'v_rieseni', 'vybavene', 'zamietnute']
@@ -69,6 +73,7 @@ export function DetailPodania() {
   const [obcan, setObcan] = useState<Resident | null>(null)
   const [nehnutelnost, setNehnutelnost] = useState<Property | null>(null)
   const [nacitavame, setNacitavame] = useState(true)
+  const [zamestnanci, setZamestnanci] = useState<StaffUser[]>([])
 
   const [stiahame, setStiahame] = useState(false)
   const [otvorenaZmenaStavu, setOtvorenaZmenaStavu] = useState(false)
@@ -84,6 +89,7 @@ export function DetailPodania() {
     if (!podanieId) return
     const nacitane = await data.getSubmission(podanieId)
     setPodanie(nacitane)
+    setZamestnanci(await data.listStaff())
     if (nacitane) {
       setSchema(getFormSchema(nacitane.formId) ?? null)
       setNovyStav(nacitane.status)
@@ -194,6 +200,10 @@ export function DetailPodania() {
     )
   }
 
+  const riesitel = podanie.riesitelId
+    ? zamestnanci.find((z) => z.id === podanie.riesitelId)
+    : undefined
+
   const sekcie = schema ? visibleSections(schema, podanie.data) : []
 
   return (
@@ -273,6 +283,38 @@ export function DetailPodania() {
               Tento údaj je chránený a slúži len na vyhotovenie úradných listín.
             </p>
           </div>
+        ) : null}
+      </Card>
+
+      <Card className="p-5">
+        <h2 className="mb-3 text-lg font-semibold">Riešiteľ</h2>
+        <DefinitionList
+          polozky={[
+            { label: 'Agenda', hodnota: ROLA_LABEL[podanie.rolaRiesitela] ?? podanie.rolaRiesitela },
+            ...(riesitel
+              ? [
+                  {
+                    label: 'Pridelené zamestnancovi',
+                    hodnota: (
+                      <>
+                        <span className="block font-medium text-ink">
+                          {riesitel.meno} {riesitel.priezvisko}
+                        </span>
+                        <span className="block text-sm text-ink-muted">
+                          {ROLA_LABEL[riesitel.role] ?? riesitel.role}
+                        </span>
+                        <span className="block text-sm text-ink-muted">{riesitel.email}</span>
+                      </>
+                    ),
+                  },
+                ]
+              : []),
+          ]}
+        />
+        {!riesitel ? (
+          <Alert ton="varovanie" className="mt-3">
+            Podanie zatiaľ nemá prideleného riešiteľa. Úrad nemá pre túto agendu aktívneho zamestnanca.
+          </Alert>
         ) : null}
       </Card>
 

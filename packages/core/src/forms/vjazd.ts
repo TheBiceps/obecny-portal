@@ -16,6 +16,7 @@ export const vjazdForm: FormSchema = {
   odhadovanyCasMin: 8,
   pravnyZaklad: 'zákona č. 160/1996 Zb. v znení neskorších predpisov',
   adresat: 'Obecný úrad',
+  rolaRiesitela: 'referent_dopravy',
   pdfNazov: 'ziadost-o-povolenie-na-vjazd',
   infoPoznamka:
     'Povolenie sa vydáva do vlastných rúk žiadateľovi po predložení dokladu o uhradení správneho poplatku.',

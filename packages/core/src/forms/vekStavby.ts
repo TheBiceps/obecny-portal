@@ -15,6 +15,7 @@ export const vekStavbyForm: FormSchema = {
   odhadovanyCasMin: 10,
   pravnyZaklad: 'zákona č. 71/1967 Zb. o správnom konaní',
   adresat: 'Obecný úrad',
+  rolaRiesitela: 'referent_stavebny',
   pdfNazov: 'ziadost-o-potvrdenie-o-veku-stavby',
   infoPoznamka:
     'Potvrdenie zasielame na adresu na doručenie alebo si ho môžete prevziať osobne na úrade.',

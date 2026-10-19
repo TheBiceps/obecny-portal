@@ -5,7 +5,11 @@ export type Permission =
   | 'podania.menit_stav'
   | 'podania.mazat'
   | 'pouzivatelia.spravovat'
+  /** vidí podania všetkých agend, nielen tie svoje */
+  | 'podania.vidiet_vsetky'
   | 'demo.obnovit'
+
+const REFERENT: Permission[] = ['podania.citat', 'podania.menit_stav']
 
 const MATICA: Record<StaffRole, Permission[]> = {
   super_admin: [
@@ -13,10 +17,13 @@ const MATICA: Record<StaffRole, Permission[]> = {
     'podania.menit_stav',
     'podania.mazat',
     'pouzivatelia.spravovat',
+    'podania.vidiet_vsetky',
     'demo.obnovit',
   ],
-  referent: ['podania.citat', 'podania.menit_stav'],
-  citatel: ['podania.citat'],
+  referent_stavebny: REFERENT,
+  referent_dopravy: REFERENT,
+  referent_adries: REFERENT,
+  citatel: ['podania.citat', 'podania.vidiet_vsetky'],
 }
 
 /** Jednoduchý pomocník pre oprávnenia. Ďalšiu rolu pridáte do matice. */

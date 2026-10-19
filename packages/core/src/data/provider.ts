@@ -2,6 +2,7 @@ import type {
   AttachmentMeta,
   AuditAction,
   Address,
+  RolaRiesitela,
   Page,
   Property,
   Resident,
@@ -47,6 +48,8 @@ export type PropertyInput = Omit<
 export interface SubmissionInput {
   formId: string
   formNazov: string
+  /** agenda podľa formulára, podľa nej sa podanie pridelí referentovi */
+  rolaRiesitela: RolaRiesitela
   residentId: string | null
   ziadatelMeno: string
   ziadatelEmail: string
@@ -89,7 +92,14 @@ export interface DataProvider {
 
   /* podania */
   createSubmission(vstup: SubmissionInput): Promise<Submission>
-  listSubmissions(filter?: SubmissionFilter): Promise<Page<Submission>>
+  /**
+   * Zoznam podaní z pohľadu prihláseného zamestnanca.
+   * Referent vidí len podania svojej agendy, hlavný správca a čitateľ všetko.
+   */
+  listSubmissions(
+    filter?: SubmissionFilter,
+    aktor?: Pick<StaffUser, 'id' | 'role'> | null,
+  ): Promise<Page<Submission>>
   listSubmissionsForResident(residentId: string): Promise<Submission[]>
   getSubmission(id: string): Promise<Submission | null>
   markSubmissionRead(id: string, aktor: string): Promise<void>
@@ -106,7 +116,7 @@ export interface DataProvider {
     aktor: string,
     poznamka?: string,
   ): Promise<void>
-  statistiky(): Promise<Statistiky>
+  statistiky(aktor?: Pick<StaffUser, 'id' | 'role'> | null): Promise<Statistiky>
 
   /* zamestnanci úradu */
   listStaff(): Promise<StaffUser[]>
@@ -117,6 +127,8 @@ export interface DataProvider {
     role: StaffRole
   }): Promise<StaffUser>
   deleteStaff(id: string): Promise<void>
+  /** Zamestnanci, ktorí môžu dostať podanie danej agendy. */
+  listRiesitelia(rola: RolaRiesitela): Promise<StaffUser[]>
 
   /* demo */
   resetDemoData(): Promise<void>

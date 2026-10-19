@@ -14,6 +14,7 @@ export const predlzenieStavebnehoPovoleniaForm: FormSchema = {
   odhadovanyCasMin: 10,
   pravnyZaklad: 'stavebného zákona',
   adresat: 'Obecný úrad',
+  rolaRiesitela: 'referent_stavebny',
   pdfNazov: 'ziadost-o-predlzenie-platnosti-stavebneho-povolenia',
   infoPoznamka: 'Žiadosť je potrebné podať pred uplynutím platnosti stavebného povolenia.',
   sections: [

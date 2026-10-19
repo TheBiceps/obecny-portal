@@ -68,6 +68,7 @@ export function Formular() {
     const podanie = await data.createSubmission({
       formId: schema.id,
       formNazov: schema.nazov,
+      rolaRiesitela: schema.rolaRiesitela,
       residentId: obcan?.id ?? null,
       ziadatelMeno: nazovFirmy || meno || 'Neuvedený žiadateľ',
       ziadatelEmail: String(values.email ?? ''),

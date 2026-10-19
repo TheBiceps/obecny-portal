@@ -64,7 +64,26 @@ export interface Resident extends TenantScoped {
 /* Zamestnanci úradu                                                    */
 /* ------------------------------------------------------------------ */
 
-export type StaffRole = 'super_admin' | 'referent' | 'citatel'
+/**
+ * Rola určuje aj agendu, ktorú zamestnanec vybavuje.
+ * Hlavný správca vidí všetko, referent vidí podania svojej agendy,
+ * čitateľ má prehľad bez možnosti zasahovať.
+ */
+export type StaffRole =
+  | 'super_admin'
+  | 'referent_stavebny'
+  | 'referent_dopravy'
+  | 'referent_adries'
+  | 'citatel'
+
+/** Roly, ktoré riešia podania občanov. Nový referát pridáte jedným riadkom. */
+export const ROLY_RIESITELOV = [
+  'referent_stavebny',
+  'referent_dopravy',
+  'referent_adries',
+] as const
+
+export type RolaRiesitela = (typeof ROLY_RIESITELOV)[number]
 export type StaffStatus = 'aktivny' | 'pozvany' | 'deaktivovany'
 
 export interface StaffUser extends TenantScoped {
@@ -96,6 +115,7 @@ export interface AttachmentMeta {
 
 export type AuditAction =
   | 'prijate'
+  | 'pridelene'
   | 'zobrazene'
   | 'zmena_stavu'
   | 'stiahnute_pdf'
@@ -119,6 +139,10 @@ export interface Submission extends TenantScoped {
   ziadatelMeno: string
   ziadatelEmail: string
   propertyId?: Id | null
+  /** agenda, ktorej podanie patrí, prevzaté z formulára pri odoslaní */
+  rolaRiesitela: RolaRiesitela
+  /** konkrétny zamestnanec, ktorému bolo podanie pridelené */
+  riesitelId: Id | null
   data: Record<string, unknown>
   prilohy: AttachmentMeta[]
   status: SubmissionStatus
@@ -132,6 +156,10 @@ export interface SubmissionFilter {
   hladat?: string
   formId?: string
   status?: SubmissionStatus
+  /** len podania danej agendy */
+  rolaRiesitela?: RolaRiesitela
+  /** len podania prideleného zamestnanca */
+  riesitelId?: Id
   odDatumu?: string
   doDatumu?: string
   zoradit?: 'datum_desc' | 'datum_asc' | 'meno_asc' | 'stav'

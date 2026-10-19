@@ -13,6 +13,7 @@ export const predlzenieUzemnehoRozhodnutiaForm: FormSchema = {
   odhadovanyCasMin: 10,
   pravnyZaklad: 'stavebného zákona a zákona č. 71/1967 Zb. o správnom konaní',
   adresat: 'Obecný úrad',
+  rolaRiesitela: 'referent_stavebny',
   pdfNazov: 'navrh-na-predlzenie-platnosti-uzemneho-rozhodnutia',
   infoPoznamka: 'Návrh je potrebné podať pred uplynutím platnosti územného rozhodnutia.',
   sections: [

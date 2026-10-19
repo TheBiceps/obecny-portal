@@ -23,8 +23,12 @@ import {
   can,
   formatDate,
   formsForTenant,
+  ROLA_LABEL,
+  ROLY_RIESITELOV,
   STAV_LABEL,
   type Page,
+  type RolaRiesitela,
+  type StaffUser,
   type Submission,
   type SubmissionFilter,
   type SubmissionStatus,
@@ -67,6 +71,7 @@ export function Podania() {
     vRieseni: number
     vybaveneTentoMesiac: number
   } | null>(null)
+  const [zamestnanci, setZamestnanci] = useState<StaffUser[]>([])
   const [obnovaOtvorena, setObnovaOtvorena] = useState(false)
   const [obnovujeme, setObnovujeme] = useState(false)
 
@@ -81,9 +86,22 @@ export function Podania() {
 
   useEffect(() => {
     let zrusene = false
+    data.listStaff().then((z) => {
+      if (!zrusene) setZamestnanci(z)
+    })
+    return () => {
+      zrusene = true
+    }
+  }, [data, zmenaVerzie])
+
+  const zamestnanciPodlaId = useMemo(() => new Map(zamestnanci.map((z) => [z.id, z])), [zamestnanci])
+  const vidiVsetky = can(uzivatel?.role, 'podania.vidiet_vsetky')
+
+  useEffect(() => {
+    let zrusene = false
     setNacitavame(true)
     data
-      .listSubmissions(filter)
+      .listSubmissions(filter, uzivatel)
       .then((vysledok) => {
         if (!zrusene) setStranka(vysledok)
       })
@@ -93,22 +111,23 @@ export function Podania() {
     return () => {
       zrusene = true
     }
-  }, [data, filter, zmenaVerzie])
+  }, [data, filter, uzivatel, zmenaVerzie])
 
   useEffect(() => {
     let zrusene = false
-    data.statistiky().then((s) => {
+    data.statistiky(uzivatel).then((s) => {
       if (!zrusene) setStatistiky(s)
     })
     return () => {
       zrusene = true
     }
-  }, [data, zmenaVerzie])
+  }, [data, uzivatel, zmenaVerzie])
 
   const filtreAktivne =
     Boolean(filter.hladat) ||
     Boolean(filter.formId) ||
     Boolean(filter.status) ||
+    Boolean(filter.rolaRiesitela) ||
     Boolean(filter.odDatumu) ||
     Boolean(filter.doDatumu)
 
@@ -153,7 +172,11 @@ export function Podania() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader nadpis="Prijaté podania" popis="Prehľad podaní doručených od občanov cez portál." />
+      <PageHeader nadpis="Prijaté podania" popis={
+          vidiVsetky || !uzivatel
+            ? 'Prehľad podaní doručených od občanov cez portál.'
+            : `Podania pre agendu: ${ROLA_LABEL[uzivatel.role]}.`
+        } />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card className="p-5">
@@ -219,6 +242,29 @@ export function Podania() {
               ))}
             </Select>
           </Field>
+
+          {vidiVsetky ? (
+            <Field label="Agenda" htmlFor="filter-agenda">
+              <Select
+                id="filter-agenda"
+                value={filter.rolaRiesitela ?? ''}
+                onChange={(e) =>
+                  setFilter((f) => ({
+                    ...f,
+                    rolaRiesitela: (e.target.value || undefined) as RolaRiesitela | undefined,
+                    strana: 1,
+                  }))
+                }
+              >
+                <option value="">Všetky agendy</option>
+                {ROLY_RIESITELOV.map((r) => (
+                  <option key={r} value={r}>
+                    {ROLA_LABEL[r]}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          ) : null}
 
           <div className="grid grid-cols-2 gap-2">
             <Field label="Dátum od" htmlFor="filter-od">
@@ -323,6 +369,7 @@ export function Podania() {
                       ) : null}
                     </button>
                   </Th>
+                  <Th>Riešiteľ</Th>
                   <Th>
                     <span className="sr-only">Akcie</span>
                   </Th>
@@ -370,6 +417,22 @@ export function Podania() {
                     <Td>{s.cisloPodania}</Td>
                     <Td>
                       <StatusBadge stav={s.status} label={STAV_LABEL[s.status] ?? s.status} />
+                    </Td>
+                    <Td>
+                      {(() => {
+                        const riesitel = s.riesitelId ? zamestnanciPodlaId.get(s.riesitelId) : undefined
+                        if (!riesitel) return <Badge ton="varovanie">Nepridelené</Badge>
+                        return (
+                          <span className="flex max-w-[14rem] flex-col">
+                            <span className="break-words font-medium text-ink">
+                              {riesitel.meno} {riesitel.priezvisko}
+                            </span>
+                            <span className="break-words text-xs text-ink-muted">
+                              {ROLA_LABEL[riesitel.role] ?? riesitel.role}
+                            </span>
+                          </span>
+                        )
+                      })()}
                     </Td>
                     <Td>
                       <a

@@ -14,6 +14,7 @@ export const predlzenieTerminuDokonceniaForm: FormSchema = {
   odhadovanyCasMin: 10,
   pravnyZaklad: 'stavebného zákona',
   adresat: 'Obecný úrad',
+  rolaRiesitela: 'referent_stavebny',
   pdfNazov: 'ziadost-o-predlzenie-terminu-dokoncenia-stavby',
   infoPoznamka: 'Žiadosť podajte skôr, ako uplynie termín dokončenia uvedený v stavebnom povolení.',
   sections: [

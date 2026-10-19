@@ -17,6 +17,9 @@ Obe aplikácie bežia na rovnakom pôvode, takže zdieľajú `localStorage`.
 | --- | --- | --- |
 | Občan | `obcan@demo.sk` | `Demo1234` |
 | Hlavný správca úradu | `starosta@demo.sk` | `Urad1234` |
+| Referent stavebného úradu | `stavebny@demo.sk` | `Urad1234` |
+| Referent dopravy | `doprava@demo.sk` | `Urad1234` |
+| Referent evidencie adries | `adresy@demo.sk` | `Urad1234` |
 
 V CRM je dole na stránke Prijaté podania skryté tlačidlo **Obnoviť demo dáta**,
 ktoré vráti ukážkové záznamy do pôvodného stavu.
@@ -78,6 +81,41 @@ Niektoré tlačivá majú na papieri sumu poplatku prázdnu, dopĺňa ju poklad�
 podľa sadzobníka. Schéma to zachytáva príznakom `poplatokUrcujeUrad: true`
 a portál potom píše „Poplatok určí úrad“ namiesto „Bez poplatku“.
 
+## Prideľovanie podaní podľa agendy
+
+Každý formulár patrí jednej agende úradu, zapisuje sa to v schéme ako
+`rolaRiesitela`. Keď občan odošle žiadosť, dátová vrstva ju hneď pridelí
+aktívnemu referentovi tejto agendy, a to tomu, kto má práve najmenej
+nevybavených podaní.
+
+| Rola | Vidí | Agenda |
+| --- | --- | --- |
+| Hlavný správca | všetky podania | riadi úrad, podania nerieši |
+| Referent stavebného úradu | len svoju agendu | vek stavby, predĺženia, pasport stavby |
+| Referent dopravy a komunikácií | len svoju agendu | povolenie na vjazd |
+| Referent evidencie adries | len svoju agendu | súpisné a orientačné číslo |
+| Čitateľ | všetky podania | len na čítanie |
+
+Rozsah videnia určuje oprávnenie `podania.vidiet_vsetky`. Nevynucuje sa len
+v rozhraní, ale priamo v dátovej vrstve: `listSubmissions(filter, aktor)`
+aj `statistiky(aktor)` dostávajú prihláseného zamestnanca a samy odfiltrujú
+cudziu agendu.
+
+Hlavný správca má v časti Používatelia prehľad o vyťažení kolegov a po kliknutí
+na zamestnanca uvidí zoznam jeho podaní.
+
+### Ako pridať nový referát
+
+1. Doplňte rolu do `StaffRole` a do zoznamu `ROLY_RIESITELOV`
+   v `packages/core/src/types.ts`.
+2. Pridajte jej popisky do `ROLA_LABEL` a `AGENDA_LABEL`
+   v `packages/core/src/format.ts`.
+3. Priraďte jej oprávnenia v matici v `packages/core/src/data/permissions.ts`.
+4. Pri formulároch, ktoré má referát vybavovať, nastavte `rolaRiesitela`.
+
+Keď pre agendu nie je aktívny zamestnanec, podanie sa uloží ako nepridelené
+a správca ho v zozname vidí s odznakom „Nepridelené“.
+
 ## Ako pridať ďalší formulár
 
 Formuláre sú dáta, nie kód. Nová žiadosť je jeden nový súbor.
@@ -92,6 +130,7 @@ Formuláre sú dáta, nie kód. Nová žiadosť je jeden nový súbor.
    * `validate`: `email | telefon | psc | ico | rodneCislo | rok | cisloOp`
    * poplatok: `poplatokEur` pre pevnú sumu, prípadne `poplatokUrcujeUrad: true`,
      keď sumu dopĺňa úrad
+   * `rolaRiesitela`: agenda úradu, ktorá podanie vybavuje
    * `visibleIf`: podmienka `{ field, equals | oneOf | isTruthy }`, prípadne `{ and: [...] }` alebo `{ or: [...] }`
    * `autofillFrom`: `resident.<cesta>`, `property.<cesta>`, `tenant.<cesta>` alebo `dnes`
    * `optionsFromTenant: 'katastralneUzemia'` pre zoznam z konfigurácie obce

@@ -92,8 +92,17 @@ export const VZTAH_LABEL: Record<string, string> = {
 
 export const ROLA_LABEL: Record<string, string> = {
   super_admin: 'Hlavný správca',
-  referent: 'Referent',
+  referent_stavebny: 'Referent stavebného úradu',
+  referent_dopravy: 'Referent dopravy a komunikácií',
+  referent_adries: 'Referent evidencie adries',
   citatel: 'Čitateľ',
+}
+
+/** Krátky názov agendy do tabuliek, kde je málo miesta. */
+export const AGENDA_LABEL: Record<string, string> = {
+  referent_stavebny: 'Stavebný úrad',
+  referent_dopravy: 'Doprava',
+  referent_adries: 'Adresy',
 }
 
 export const STAV_POUZIVATELA_LABEL: Record<string, string> = {

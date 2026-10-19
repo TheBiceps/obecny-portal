@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Trash2, UserPlus } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ListChecks, Trash2, UserPlus } from 'lucide-react'
 import {
   Alert,
   Badge,
@@ -16,6 +17,8 @@ import {
   Modal,
   PageHeader,
   Select,
+  Spinner,
+  StatusBadge,
   Table,
   Td,
   Th,
@@ -24,11 +27,13 @@ import {
 import {
   DataError,
   ROLA_LABEL,
+  STAV_LABEL,
   STAV_POUZIVATELA_LABEL,
   can,
   formatDate,
   type StaffRole,
   type StaffUser,
+  type Submission,
 } from '@obec/core'
 import { useAuth } from '../app/auth'
 import { useTenant } from '../app/tenant'
@@ -38,24 +43,38 @@ const schema = z.object({
   meno: z.string().min(1, 'Zadajte meno.'),
   priezvisko: z.string().min(1, 'Zadajte priezvisko.'),
   email: z.string().min(1, 'Zadajte e-mail.').email('Zadajte e-mail v tvare meno@domena.sk.'),
-  role: z.enum(['super_admin', 'referent', 'citatel'], {
-    errorMap: () => ({ message: 'Vyberte rolu.' }),
-  }),
+  role: z.enum(
+    ['super_admin', 'referent_stavebny', 'referent_dopravy', 'referent_adries', 'citatel'],
+    { errorMap: () => ({ message: 'Vyberte rolu.' }) },
+  ),
 })
 
 type Hodnoty = z.infer<typeof schema>
 
 const POLOZKY_ROLI: { hodnota: StaffRole; label: string }[] = [
   { hodnota: 'super_admin', label: ROLA_LABEL.super_admin },
-  { hodnota: 'referent', label: ROLA_LABEL.referent },
+  { hodnota: 'referent_stavebny', label: ROLA_LABEL.referent_stavebny },
+  { hodnota: 'referent_dopravy', label: ROLA_LABEL.referent_dopravy },
+  { hodnota: 'referent_adries', label: ROLA_LABEL.referent_adries },
   { hodnota: 'citatel', label: ROLA_LABEL.citatel },
 ]
+
+const NERIESI: StaffRole[] = ['super_admin', 'citatel']
+
+type Pocty = Record<string, { spolu: number; nevybavene: number }>
 
 const LABEL_POLA: Record<string, string> = {
   meno: 'Meno',
   priezvisko: 'Priezvisko',
   email: 'E-mail',
   role: 'Rola',
+}
+
+function textPoctu(p?: { spolu: number; nevybavene: number }) {
+  const spolu = p?.spolu ?? 0
+  const nevybavene = p?.nevybavene ?? 0
+  const slovo = spolu === 1 ? 'podanie' : spolu >= 2 && spolu <= 4 ? 'podania' : 'podaní'
+  return `${spolu} ${slovo}, z toho ${nevybavene} nevybavené`
 }
 
 export function Pouzivatelia() {
@@ -70,6 +89,11 @@ export function Pouzivatelia() {
   const [nacitavame, setNacitavame] = useState(true)
   const [chybaNacitania, setChybaNacitania] = useState<string | null>(null)
 
+  const [pocty, setPocty] = useState<Pocty>({})
+  const [vybrany, setVybrany] = useState<StaffUser | null>(null)
+  const [podaniaVybraneho, setPodaniaVybraneho] = useState<Submission[] | null>(null)
+  const [chybaPodani, setChybaPodani] = useState(false)
+
   const [otvorenaPozvanka, setOtvorenaPozvanka] = useState(false)
   const [naOdstranenie, setNaOdstranenie] = useState<StaffUser | null>(null)
   const [odstranujeme, setOdstranujeme] = useState(false)
@@ -82,7 +106,7 @@ export function Pouzivatelia() {
     formState: { errors, isSubmitting },
   } = useForm<Hodnoty>({
     resolver: zodResolver(schema),
-    defaultValues: { meno: '', priezvisko: '', email: '', role: 'citatel' },
+    defaultValues: { meno: '', priezvisko: '', email: '', role: 'referent_stavebny' },
   })
 
   const nacitatZoznam = useCallback(async () => {
@@ -91,16 +115,49 @@ export function Pouzivatelia() {
     try {
       const zamestnanci = await data.listStaff()
       setZoznam(zamestnanci)
+      if (uzivatel) {
+        const vsetky = await data.listSubmissions({ naStranu: 1000 }, uzivatel)
+        const vypocet: Pocty = {}
+        for (const p of vsetky.polozky) {
+          if (!p.riesitelId) continue
+          const z = (vypocet[p.riesitelId] ??= { spolu: 0, nevybavene: 0 })
+          z.spolu += 1
+          if (p.status === 'prijate' || p.status === 'v_rieseni') z.nevybavene += 1
+        }
+        setPocty(vypocet)
+      }
     } catch {
       setChybaNacitania('Zoznam používateľov sa nepodarilo načítať. Skúste to prosím znova.')
     } finally {
       setNacitavame(false)
     }
-  }, [data])
+  }, [data, uzivatel])
 
   useEffect(() => {
+    if (!maOpravnenie) return
     nacitatZoznam()
-  }, [nacitatZoznam, zmenyDat])
+  }, [nacitatZoznam, zmenyDat, maOpravnenie])
+
+  useEffect(() => {
+    if (!vybrany || !uzivatel) return
+    let zrusene = false
+    setPodaniaVybraneho(null)
+    setChybaPodani(false)
+    data
+      .listSubmissions({ riesitelId: vybrany.id, naStranu: 100 }, uzivatel)
+      .then((strana) => {
+        if (!zrusene) setPodaniaVybraneho(strana.polozky)
+      })
+      .catch(() => {
+        if (!zrusene) {
+          setPodaniaVybraneho([])
+          setChybaPodani(true)
+        }
+      })
+    return () => {
+      zrusene = true
+    }
+  }, [vybrany, data, uzivatel, zmenyDat])
 
   const chyby = Object.entries(errors).map(([kluc, chyba]) => ({
     fieldId: kluc,
@@ -110,7 +167,7 @@ export function Pouzivatelia() {
 
   function zavriePozvanku() {
     setOtvorenaPozvanka(false)
-    reset({ meno: '', priezvisko: '', email: '', role: 'citatel' })
+    reset({ meno: '', priezvisko: '', email: '', role: 'referent_stavebny' })
   }
 
   const onOdoslatPozvanku = handleSubmit(async (hodnoty) => {
@@ -143,26 +200,29 @@ export function Pouzivatelia() {
     }
   }
 
+  if (!maOpravnenie) {
+    return (
+      <div className="flex flex-col gap-6">
+        <PageHeader nadpis="Používatelia" />
+        <Alert ton="varovanie">
+          <p>Správa používateľov patrí hlavnému správcovi. Vaša rola k nej nemá prístup.</p>
+        </Alert>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         nadpis="Používatelia"
         popis="Hlavný správca môže pozvať zamestnancov úradu do CRM a spravovať ich prístup."
         akcie={
-          maOpravnenie ? (
-            <Button onClick={() => setOtvorenaPozvanka(true)}>
-              <UserPlus className="h-4 w-4" aria-hidden="true" />
-              Pozvať zamestnanca
-            </Button>
-          ) : undefined
+          <Button onClick={() => setOtvorenaPozvanka(true)}>
+            <UserPlus className="h-4 w-4" aria-hidden="true" />
+            Pozvať zamestnanca
+          </Button>
         }
       />
-
-      {!maOpravnenie ? (
-        <Alert ton="varovanie">
-          <p>Na správu používateľov nemáte oprávnenie, zoznam si môžete iba prezerať.</p>
-        </Alert>
-      ) : null}
 
       {chybaNacitania ? (
         <Alert ton="chyba">
@@ -186,6 +246,7 @@ export function Pouzivatelia() {
               <Th>E-mail</Th>
               <Th>Rola</Th>
               <Th>Stav</Th>
+              <Th>Pridelené podania</Th>
               <Th>Vytvorené</Th>
               <Th>
                 <span className="sr-only">Akcie</span>
@@ -196,7 +257,11 @@ export function Pouzivatelia() {
             {zoznam.map((s) => {
               const jeVlastneKonto = s.id === uzivatel?.id
               return (
-                <tr key={s.id}>
+                <tr
+                  key={s.id}
+                  className="cursor-pointer transition-colors duration-150 hover:bg-canvas"
+                  onClick={() => setVybrany(s)}
+                >
                   <Td>
                     {s.meno} {s.priezvisko}
                   </Td>
@@ -215,21 +280,45 @@ export function Pouzivatelia() {
                       {STAV_POUZIVATELA_LABEL[s.status] ?? s.status}
                     </Badge>
                   </Td>
+                  <Td>
+                    {NERIESI.includes(s.role) ? (
+                      <span className="text-ink-muted">Nerieši podania</span>
+                    ) : (
+                      textPoctu(pocty[s.id])
+                    )}
+                  </Td>
                   <Td>{formatDate(s.createdAt)}</Td>
                   <Td>
-                    {!maOpravnenie ? null : jeVlastneKonto ? (
-                      <span className="text-sm text-ink-muted">Vaše konto</span>
-                    ) : (
+                    <div className="flex flex-wrap items-center gap-2">
                       <Button
-                        variant="ghost"
+                        variant="secondary"
                         size="sm"
-                        onClick={() => setNaOdstranenie(s)}
-                        aria-label={`Odstrániť používateľa ${s.meno} ${s.priezvisko}`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setVybrany(s)
+                        }}
+                        aria-label={`Zobraziť podania zamestnanca ${s.meno} ${s.priezvisko}`}
                       >
-                        <Trash2 className="h-4 w-4" aria-hidden="true" />
-                        Odstrániť
+                        <ListChecks className="h-4 w-4" aria-hidden="true" />
+                        Zobraziť podania
                       </Button>
-                    )}
+                      {jeVlastneKonto ? (
+                        <span className="text-sm text-ink-muted">Vaše konto</span>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setNaOdstranenie(s)
+                          }}
+                          aria-label={`Odstrániť používateľa ${s.meno} ${s.priezvisko}`}
+                        >
+                          <Trash2 className="h-4 w-4" aria-hidden="true" />
+                          Odstrániť
+                        </Button>
+                      )}
+                    </div>
                   </Td>
                 </tr>
               )
@@ -239,11 +328,7 @@ export function Pouzivatelia() {
       ) : (
         <EmptyState
           nadpis="Zatiaľ žiadni používatelia"
-          popis={
-            maOpravnenie
-              ? 'Pozvite prvého zamestnanca úradu pomocou tlačidla vyššie.'
-              : 'V zozname zatiaľ nie sú žiadni zamestnanci úradu.'
-          }
+          popis="Pozvite prvého zamestnanca úradu pomocou tlačidla vyššie."
         />
       )}
 
@@ -255,8 +340,9 @@ export function Pouzivatelia() {
             mení ich stav, maže podania, spravuje používateľov a obnovuje ukážkové dáta.
           </li>
           <li>
-            <span className="font-medium text-ink">{ROLA_LABEL.referent}</span>: číta podania a
-            mení ich stav.
+            <span className="font-medium text-ink">Referenti</span> ({ROLA_LABEL.referent_stavebny},{' '}
+            {ROLA_LABEL.referent_dopravy}, {ROLA_LABEL.referent_adries}): čítajú podania a menia
+            ich stav.
           </li>
           <li>
             <span className="font-medium text-ink">{ROLA_LABEL.citatel}</span>: podania si len
@@ -264,7 +350,7 @@ export function Pouzivatelia() {
           </li>
         </ul>
         <p className="mt-3 text-sm text-ink-muted">
-          Ďalšie roly je možné doplniť do konfigurácie oprávnení.
+          Referent vidí iba podania svojej agendy, zatiaľ čo hlavný správca a čitateľ vidia všetky.
         </p>
       </Card>
 
@@ -322,6 +408,56 @@ export function Pouzivatelia() {
             {STAV_POUZIVATELA_LABEL.pozvany}.
           </p>
         </form>
+      </Modal>
+
+      <Modal
+        otvorene={vybrany !== null}
+        nazov="Podania zamestnanca"
+        popis={
+          vybrany
+            ? `${vybrany.meno} ${vybrany.priezvisko}, ${ROLA_LABEL[vybrany.role] ?? vybrany.role}`
+            : undefined
+        }
+        onZavriet={() => setVybrany(null)}
+        akcie={
+          <Button variant="secondary" onClick={() => setVybrany(null)}>
+            Zavrieť
+          </Button>
+        }
+      >
+        {podaniaVybraneho === null ? (
+          <Spinner popis="Načítavame podania zamestnanca" />
+        ) : chybaPodani ? (
+          <Alert ton="chyba">
+            <p>Podania zamestnanca sa nepodarilo načítať. Skúste to prosím znova.</p>
+          </Alert>
+        ) : podaniaVybraneho.length === 0 ? (
+          <EmptyState
+            nadpis="Žiadne pridelené podania"
+            popis="Tomuto zamestnancovi zatiaľ nebolo pridelené žiadne podanie."
+          />
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {podaniaVybraneho.map((p) => (
+              <li key={p.id}>
+                <Link
+                  to={`/podania/${p.id}`}
+                  onClick={() => setVybrany(null)}
+                  className="flex min-h-[44px] flex-col gap-1 rounded-card border border-line p-3 transition-colors duration-150 hover:bg-canvas"
+                >
+                  <span className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-medium text-ink">{p.cisloPodania}</span>
+                    <StatusBadge stav={p.status} label={STAV_LABEL[p.status] ?? p.status} />
+                  </span>
+                  <span className="text-sm text-ink">{p.formNazov}</span>
+                  <span className="text-sm text-ink-muted">
+                    {p.ziadatelMeno}, prijaté {formatDate(p.prijateAt)}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </Modal>
 
       <ConfirmModal

@@ -6,7 +6,7 @@ export * from './provider'
 export * from './permissions'
 export { LocalStorageProvider } from './localStorageProvider'
 export { ApiProvider } from './apiProvider'
-export { DEMO_UCTY, buildSeed, demoHash } from './seed'
+export { DEMO_UCTY, VERZIA_DB, buildSeed, demoHash } from './seed'
 export type { DemoDb } from './seed'
 
 let instancia: LocalStorageProvider | null = null

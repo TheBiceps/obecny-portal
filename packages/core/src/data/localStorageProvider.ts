@@ -2,6 +2,7 @@ import type { TenantConfig } from '../tenant/types'
 import type {
   AuditAction,
   AuditEntry,
+  RolaRiesitela,
   Page,
   Property,
   Resident,
@@ -13,6 +14,7 @@ import type {
 } from '../types'
 import { buildCisloPodania } from '../format'
 import { isEmailValid } from '../validation/formats'
+import { can } from './permissions'
 import {
   DataError,
   type DataProvider,
@@ -21,12 +23,11 @@ import {
   type Statistiky,
   type SubmissionInput,
 } from './provider'
-import { buildSeed, demoHash, type DemoDb } from './seed'
+import { buildSeed, demoHash, VERZIA_DB, type DemoDb } from './seed'
 
-const VERZIA = 1
 
 function kluc(tenantId: string) {
-  return `obec.${tenantId}.db.v${VERZIA}`
+  return `obec.${tenantId}.db.v${VERZIA_DB}`
 }
 
 function id(predpona: string): string {
@@ -65,7 +66,7 @@ export class LocalStorageProvider implements DataProvider {
     }
     try {
       const db = JSON.parse(surove) as DemoDb
-      if (db.verzia !== VERZIA) throw new Error('stará verzia')
+      if (db.verzia !== VERZIA_DB) throw new Error('stará verzia')
       return db
     } catch {
       const seed = buildSeed(this.tenant)
@@ -222,10 +223,42 @@ export class LocalStorageProvider implements DataProvider {
 
   /* podania ----------------------------------------------------------- */
 
+  /**
+   * Vyberie referenta pre danú agendu. Podanie dostane ten, kto má
+   * momentálne najmenej nevybavených podaní, aby sa práca rozdelila rovnomerne.
+   */
+  private vyberRiesitela(db: DemoDb, rola: RolaRiesitela): StaffUser | null {
+    const kandidati = db.staff.filter(
+      (s) => s.role === rola && s.status === 'aktivny',
+    )
+    if (kandidati.length === 0) return null
+    const zataz = (id: string) =>
+      db.submissions.filter(
+        (p) =>
+          p.riesitelId === id &&
+          p.status !== 'vybavene' &&
+          p.status !== 'zamietnute',
+      ).length
+    return [...kandidati].sort(
+      (a, b) => zataz(a.id) - zataz(b.id) || a.createdAt.localeCompare(b.createdAt),
+    )[0]
+  }
+
+  /** Referent vidí len svoju agendu, správca a čitateľ vidia všetko. */
+  private viditelnePre(
+    polozky: Submission[],
+    aktor?: Pick<StaffUser, 'id' | 'role'> | null,
+  ): Submission[] {
+    if (!aktor) return polozky
+    if (can(aktor.role, 'podania.vidiet_vsetky')) return polozky
+    return polozky.filter((s) => s.rolaRiesitela === aktor.role)
+  }
+
   async createSubmission(vstup: SubmissionInput): Promise<Submission> {
     const db = this.nacitaj()
     db.poradie += 1
     const teraz = new Date().toISOString()
+    const riesitel = this.vyberRiesitela(db, vstup.rolaRiesitela)
     const podanie: Submission = {
       id: id('sub'),
       tenantId: this.tenantId,
@@ -240,6 +273,8 @@ export class LocalStorageProvider implements DataProvider {
       ziadatelMeno: vstup.ziadatelMeno,
       ziadatelEmail: vstup.ziadatelEmail,
       propertyId: vstup.propertyId ?? null,
+      rolaRiesitela: vstup.rolaRiesitela,
+      riesitelId: riesitel?.id ?? null,
       data: vstup.data,
       prilohy: vstup.prilohy,
       status: 'prijate',
@@ -248,6 +283,17 @@ export class LocalStorageProvider implements DataProvider {
       aktualizovaneAt: teraz,
       audit: [
         { id: id('aud'), action: 'prijate', at: teraz, aktor: vstup.ziadatelMeno },
+        ...(riesitel
+          ? [
+              {
+                id: id('aud'),
+                action: 'pridelene' as const,
+                at: teraz,
+                aktor: 'Systém',
+                poznamka: `Pridelené na ${riesitel.meno} ${riesitel.priezvisko}`,
+              },
+            ]
+          : []),
       ],
     }
     db.submissions.unshift(podanie)
@@ -255,9 +301,22 @@ export class LocalStorageProvider implements DataProvider {
     return podanie
   }
 
-  async listSubmissions(filter: SubmissionFilter = {}): Promise<Page<Submission>> {
+  async listSubmissions(
+    filter: SubmissionFilter = {},
+    aktor?: Pick<StaffUser, 'id' | 'role'> | null,
+  ): Promise<Page<Submission>> {
     const db = this.nacitaj()
-    let polozky = db.submissions.filter((s) => s.tenantId === this.tenantId)
+    let polozky = this.viditelnePre(
+      db.submissions.filter((s) => s.tenantId === this.tenantId),
+      aktor,
+    )
+
+    if (filter.rolaRiesitela) {
+      polozky = polozky.filter((s) => s.rolaRiesitela === filter.rolaRiesitela)
+    }
+    if (filter.riesitelId) {
+      polozky = polozky.filter((s) => s.riesitelId === filter.riesitelId)
+    }
 
     const hladat = filter.hladat?.trim().toLowerCase()
     if (hladat) {
@@ -373,18 +432,21 @@ export class LocalStorageProvider implements DataProvider {
     this.uloz(db)
   }
 
-  async statistiky(): Promise<Statistiky> {
+  async statistiky(
+    aktor?: Pick<StaffUser, 'id' | 'role'> | null,
+  ): Promise<Statistiky> {
     const db = this.nacitaj()
+    const polozky = this.viditelnePre(db.submissions, aktor)
     const teraz = new Date()
     const zaciatokMesiaca = new Date(teraz.getFullYear(), teraz.getMonth(), 1)
     return {
-      nove: db.submissions.filter((s) => !s.precitane).length,
-      vRieseni: db.submissions.filter((s) => s.status === 'v_rieseni').length,
-      vybaveneTentoMesiac: db.submissions.filter(
+      nove: polozky.filter((s) => !s.precitane).length,
+      vRieseni: polozky.filter((s) => s.status === 'v_rieseni').length,
+      vybaveneTentoMesiac: polozky.filter(
         (s) =>
           s.status === 'vybavene' && new Date(s.aktualizovaneAt) >= zaciatokMesiaca,
       ).length,
-      spolu: db.submissions.length,
+      spolu: polozky.length,
     }
   }
 
@@ -424,7 +486,17 @@ export class LocalStorageProvider implements DataProvider {
   async deleteStaff(idHladany: string): Promise<void> {
     const db = this.nacitaj()
     db.staff = db.staff.filter((s) => s.id !== idHladany)
+    // Podania po odchode zamestnanca nezmiznú, len zostanú nepridelené.
+    for (const p of db.submissions) {
+      if (p.riesitelId === idHladany) p.riesitelId = null
+    }
     this.uloz(db)
+  }
+
+  async listRiesitelia(rola: RolaRiesitela): Promise<StaffUser[]> {
+    return this.nacitaj().staff.filter(
+      (s) => s.role === rola && s.status === 'aktivny',
+    )
   }
 
   /* demo -------------------------------------------------------------- */

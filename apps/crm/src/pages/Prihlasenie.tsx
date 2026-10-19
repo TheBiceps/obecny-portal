@@ -64,9 +64,9 @@ export function Prihlasenie() {
     }
   })
 
-  function predvyplnitDemo() {
-    setValue('email', DEMO_UCTY.urad.email, { shouldValidate: true })
-    setValue('heslo', DEMO_UCTY.urad.heslo, { shouldValidate: true })
+  function predvyplnitDemo(ucet: { email: string; heslo: string } = DEMO_UCTY.urad) {
+    setValue('email', ucet.email, { shouldValidate: true })
+    setValue('heslo', ucet.heslo, { shouldValidate: true })
     // Formulár býva mimo obrazovky, preto naň posunieme pohľad
     // a potvrdíme doplnenie, inak to vyzerá, že sa nestalo nič.
     formularRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' })
@@ -119,14 +119,39 @@ export function Prihlasenie() {
           </form>
         </Card>
 
-        <Alert ton="info" nadpis="Demo prístup">
+        <Alert ton="info" nadpis="Demo prístupy">
           <p>
-            V ukážkovej verzii sa môžete prihlásiť ako demo zamestnanec úradu: {DEMO_UCTY.urad.email},
-            heslo {DEMO_UCTY.urad.heslo}.
+            Vyskúšajte si dva pohľady na agendu úradu. Hlavný správca vidí podania
+            všetkých referátov, referent len tie svoje.
           </p>
-          <Button variant="secondary" className="mt-3 w-full sm:w-auto" onClick={predvyplnitDemo}>
-            Predvyplniť demo prístup
-          </Button>
+          <div className="mt-3 flex flex-col gap-3">
+            <div>
+              <p className="font-medium text-ink">Hlavný správca</p>
+              <p>
+                {DEMO_UCTY.urad.email}, heslo {DEMO_UCTY.urad.heslo}
+              </p>
+              <Button
+                variant="secondary"
+                className="mt-2 w-full sm:w-auto"
+                onClick={() => predvyplnitDemo(DEMO_UCTY.urad)}
+              >
+                Predvyplniť prístup správcu
+              </Button>
+            </div>
+            <div className="border-t border-line pt-3">
+              <p className="font-medium text-ink">Referent stavebného úradu</p>
+              <p>
+                {DEMO_UCTY.referent.email}, heslo {DEMO_UCTY.referent.heslo}
+              </p>
+              <Button
+                variant="secondary"
+                className="mt-2 w-full sm:w-auto"
+                onClick={() => predvyplnitDemo(DEMO_UCTY.referent)}
+              >
+                Predvyplniť prístup referenta
+              </Button>
+            </div>
+          </div>
         </Alert>
       </div>
     </div>

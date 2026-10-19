@@ -15,7 +15,14 @@ export function demoHash(heslo: string): string {
 export const DEMO_UCTY = {
   obcan: { email: 'obcan@demo.sk', heslo: 'Demo1234' },
   urad: { email: 'starosta@demo.sk', heslo: 'Urad1234' },
+  referent: { email: 'stavebny@demo.sk', heslo: 'Urad1234' },
 }
+
+/**
+ * Verzia tvaru ukážkových dát. Keď sa zmení tvar záznamov,
+ * zvýšte ju a provider si uložené dáta vytvorí nanovo.
+ */
+export const VERZIA_DB = 2
 
 export interface DemoDb {
   verzia: number
@@ -115,7 +122,67 @@ export function buildSeed(tenant: TenantConfig): DemoDb {
       passwordHash: demoHash(DEMO_UCTY.urad.heslo),
       createdAt: d(200),
     },
+    {
+      id: 'staff-stavebny',
+      tenantId,
+      meno: 'Martin',
+      priezvisko: 'Bezák',
+      email: DEMO_UCTY.referent.email,
+      role: 'referent_stavebny',
+      status: 'aktivny',
+      passwordHash: demoHash(DEMO_UCTY.referent.heslo),
+      createdAt: d(180),
+    },
+    {
+      id: 'staff-doprava',
+      tenantId,
+      meno: 'Jana',
+      priezvisko: 'Krajčíová',
+      email: 'doprava@demo.sk',
+      role: 'referent_dopravy',
+      status: 'aktivny',
+      passwordHash: demoHash(DEMO_UCTY.referent.heslo),
+      createdAt: d(170),
+    },
+    {
+      id: 'staff-adresy',
+      tenantId,
+      meno: 'Oliver',
+      priezvisko: 'Šimek',
+      email: 'adresy@demo.sk',
+      role: 'referent_adries',
+      status: 'aktivny',
+      passwordHash: demoHash(DEMO_UCTY.referent.heslo),
+      createdAt: d(160),
+    },
+    {
+      id: 'staff-pozvany',
+      tenantId,
+      meno: 'Lucia',
+      priezvisko: 'Matejová',
+      email: 'lucia.matejova@demo.sk',
+      role: 'referent_stavebny',
+      status: 'pozvany',
+      createdAt: d(4),
+    },
   ]
+
+  /** Agenda podľa formulára, rovnako ako to robí formulárový register. */
+  const AGENDA_FORMULARA: Record<string, Submission['rolaRiesitela']> = {
+    'vjazd-160-1996': 'referent_dopravy',
+    'potvrdenie-vek-stavby': 'referent_stavebny',
+    'predlzenie-uzemneho-rozhodnutia': 'referent_stavebny',
+    'predlzenie-stavebneho-povolenia': 'referent_stavebny',
+    'predlzenie-terminu-dokoncenia': 'referent_stavebny',
+    'supisne-orientacne-cislo': 'referent_adries',
+    'pasport-stavby': 'referent_stavebny',
+  }
+
+  const RIESITEL_AGENDY: Record<string, string> = {
+    referent_stavebny: 'staff-stavebny',
+    referent_dopravy: 'staff-doprava',
+    referent_adries: 'staff-adresy',
+  }
 
   type Zaznam = {
     id: string
@@ -602,9 +669,13 @@ export function buildSeed(tenant: TenantConfig): DemoDb {
 
   const submissions: Submission[] = zaznamy.map((z, i) => {
     const prijate = d(z.dniDozadu)
+    const agenda = AGENDA_FORMULARA[z.formId]
+    const riesitelId = RIESITEL_AGENDY[agenda] ?? null
     return {
       id: z.id,
       tenantId,
+      rolaRiesitela: agenda,
+      riesitelId,
       cisloPodania: buildCisloPodania(tenant.nazovKratky, ROK, i + 1),
       formId: z.formId,
       formNazov: z.formNazov,
@@ -625,6 +696,17 @@ export function buildSeed(tenant: TenantConfig): DemoDb {
           at: prijate,
           aktor: z.meno,
         },
+        ...(riesitelId
+          ? [
+              {
+                id: `${z.id}-a0`,
+                action: 'pridelene' as const,
+                at: prijate,
+                aktor: 'Systém',
+                poznamka: `Pridelené podľa agendy ${agenda}`,
+              },
+            ]
+          : []),
         ...(z.stav === 'prijate'
           ? []
           : [
@@ -641,7 +723,7 @@ export function buildSeed(tenant: TenantConfig): DemoDb {
   })
 
   return {
-    verzia: 1,
+    verzia: VERZIA_DB,
     residents: [obcan],
     properties,
     staff,
