@@ -43,7 +43,7 @@ export function Field({
 
   return (
     <Ctx.Provider value={{ inputId, helperId, errorId, maChybu: Boolean(error) }}>
-      <div className={cn('flex flex-col gap-1.5', className)}>
+      <div className={cn('flex h-full flex-col gap-1.5', className)}>
         <label htmlFor={inputId} className="text-sm font-medium text-ink">
           {label}
           {required === true ? (
@@ -65,12 +65,16 @@ export function Field({
             {helper}
           </p>
         ) : null}
-        {children}
-        {error ? (
-          <p id={errorId} className="text-sm font-medium text-danger" role="alert">
-            {error}
-          </p>
-        ) : null}
+        {/* Pomocný text pod popisom posúva vstup nižšie. V mriežke by potom
+            políčka v jednom riadku neboli zarovnané, preto vstup tlačíme k spodku bunky. */}
+        <div className="mt-auto flex flex-col gap-1.5">
+          {children}
+          {error ? (
+            <p id={errorId} className="text-sm font-medium text-danger" role="alert">
+              {error}
+            </p>
+          ) : null}
+        </div>
       </div>
     </Ctx.Provider>
   )
@@ -216,6 +220,8 @@ export interface RadioGroupProps {
   error?: string
   helper?: string
   required?: boolean
+  /** Dva stĺpce sa hodia pre krátke voľby, aby na mobile nezabrali celú obrazovku. */
+  stlpce?: 1 | 2
 }
 
 export function RadioGroup({
@@ -227,6 +233,7 @@ export function RadioGroup({
   error,
   helper,
   required,
+  stlpce = 1,
 }: RadioGroupProps) {
   const auto = useId()
   const helperId = helper ? `${auto}-popis` : undefined
@@ -249,7 +256,14 @@ export function RadioGroup({
           {helper}
         </p>
       ) : null}
-      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+      <div
+        className={cn(
+          'gap-2',
+          stlpce === 2
+            ? 'grid grid-cols-2'
+            : 'flex flex-col sm:flex-row sm:flex-wrap',
+        )}
+      >
         {options.map((o) => {
           const oid = `${auto}-${o.value}`
           const vybrane = value === o.value
@@ -258,7 +272,8 @@ export function RadioGroup({
               key={o.value}
               htmlFor={oid}
               className={cn(
-                'flex min-h-[44px] flex-1 cursor-pointer items-start gap-3 rounded-control border p-3 transition-colors duration-150',
+                'flex min-h-[44px] cursor-pointer items-start gap-3 rounded-control border p-3 transition-colors duration-150',
+                stlpce === 2 ? 'h-full' : 'flex-1',
                 vybrane
                   ? 'border-primary bg-primary-soft'
                   : 'border-line bg-surface hover:border-ink-faint',

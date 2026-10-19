@@ -530,6 +530,7 @@ function KartaNehnutelnosti() {
         otvorene={modalOtvoreny}
         nazov={upravovanaId ? 'Upraviť nehnuteľnosť' : 'Pridať nehnuteľnosť'}
         onZavriet={() => setModalOtvoreny(false)}
+        className="sm:max-w-2xl"
         akcie={
           <>
             <Button variant="secondary" onClick={() => setModalOtvoreny(false)}>

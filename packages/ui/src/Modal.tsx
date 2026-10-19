@@ -85,11 +85,12 @@ export function Modal({
         aria-labelledby={nazovId}
         aria-describedby={popis ? popisId : undefined}
         className={cn(
-          'relative w-full max-w-lg rounded-t-card bg-surface p-5 shadow-pop sm:rounded-card',
+          // Dlhý obsah sa roluje vnútri okna, hlavička a tlačidlá zostávajú na mieste.
+          'relative flex max-h-[92dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-card bg-surface shadow-pop sm:max-h-[88dvh] sm:rounded-card',
           className,
         )}
       >
-        <div className="mb-3 flex items-start justify-between gap-4">
+        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-line px-5 py-4">
           <h2 id={nazovId} className="text-lg font-semibold">
             {nazov}
           </h2>
@@ -97,18 +98,26 @@ export function Modal({
             type="button"
             onClick={onZavriet}
             aria-label="Zavrieť okno"
-            className="-mr-1 -mt-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-control text-ink-muted hover:bg-canvas"
+            className="-mr-1 flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-control text-ink-muted hover:bg-canvas"
           >
             <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
-        {popis ? (
-          <p id={popisId} className="mb-4 text-sm text-ink-muted">
-            {popis}
-          </p>
+
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+          {popis ? (
+            <p id={popisId} className="mb-4 text-sm text-ink-muted">
+              {popis}
+            </p>
+          ) : null}
+          {children}
+        </div>
+
+        {akcie ? (
+          <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-line px-5 py-4 sm:flex-row sm:justify-end [&>button]:w-full sm:[&>button]:w-auto">
+            {akcie}
+          </div>
         ) : null}
-        {children}
-        {akcie ? <div className="mt-5 flex flex-wrap justify-end gap-2">{akcie}</div> : null}
       </div>
     </div>
   )
