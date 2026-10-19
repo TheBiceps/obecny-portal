@@ -170,9 +170,24 @@ dotykové ciele od 44 px, kontrast textu najmenej 4.5:1, rešpektovanie
 
 ## Nasadenie
 
-GitHub Actions (`.github/workflows/deploy.yml`) pri každom pushi do vetvy `main`
+Ukážka beží na dvoch miestach a obe sa aktualizujú pri pushi do vetvy `main`.
+
+**Cloudflare Pages** (hlavná adresa ukážky) stavia projekt priamo z repozitára,
+príkazom `pnpm build` s výstupom v priečinku `dist`. Portál je v koreni,
+CRM v podpriečinku `/crm/`.
+
+Keby sa napojenie na Git pokazilo, obsah sa dá nasadiť aj ručne:
+
+```bash
+pnpm build
+npx wrangler pages deploy dist --project-name=bernolakovo-demo --branch=main
+```
+
+**GitHub Pages** slúži ako záloha. Workflow `.github/workflows/deploy.yml`
 skontroluje typy, spustí testy, zostaví obe aplikácie, spojí ich skriptom
-`scripts/merge-dist.mjs` do jedného priečinka `dist` a nasadí ho na GitHub Pages.
+`scripts/merge-dist.mjs` do jedného priečinka `dist` a nasadí ho.
+Základné cesty si prepíše premennými `VITE_BASE_PORTAL` a `VITE_BASE_CRM`,
+pretože Pages servíruje projekt v podpriečinku.
 
 ## Čo je v ukážke len naznačené
 
