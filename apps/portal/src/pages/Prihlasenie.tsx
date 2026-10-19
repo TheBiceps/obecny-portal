@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Landmark, ShieldCheck } from 'lucide-react'
-import { Alert, Badge, Button, Card, ErrorSummary, Field, Input } from '@obec/ui'
+import { Alert, Badge, Button, Card, ErrorSummary, Field, Input, useToast } from '@obec/ui'
 import { DataError, DEMO_UCTY } from '@obec/core'
 import { useAuth } from '../app/auth'
 
@@ -24,6 +24,9 @@ export function Prihlasenie() {
   const navigate = useNavigate()
   const location = useLocation()
   const [chybaPrihlasenia, setChybaPrihlasenia] = useState<string | null>(null)
+  const formularRef = useRef<HTMLFormElement>(null)
+  const odoslatRef = useRef<HTMLButtonElement>(null)
+  const { oznam } = useToast()
 
   const {
     register,
@@ -59,6 +62,11 @@ export function Prihlasenie() {
   function predvyplnitDemo() {
     setValue('email', DEMO_UCTY.obcan.email, { shouldValidate: true })
     setValue('heslo', DEMO_UCTY.obcan.heslo, { shouldValidate: true })
+    // Formulár býva mimo obrazovky, preto naň posunieme pohľad
+    // a potvrdíme doplnenie, inak to vyzerá, že sa nestalo nič.
+    formularRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    window.setTimeout(() => odoslatRef.current?.focus(), 350)
+    oznam('Demo prístup sme vyplnili, stačí sa prihlásiť.', 'uspech')
   }
 
   return (
@@ -69,7 +77,7 @@ export function Prihlasenie() {
           Prihláste sa e-mailom a heslom, aby ste mohli sledovať svoje podania.
         </p>
 
-        <form className="mt-6 flex flex-col gap-4" onSubmit={onOdoslat} noValidate>
+        <form ref={formularRef} className="mt-6 flex flex-col gap-4" onSubmit={onOdoslat} noValidate>
           <ErrorSummary chyby={chyby} />
 
           {chybaPrihlasenia ? (
@@ -90,7 +98,7 @@ export function Prihlasenie() {
             </Field>
           </div>
 
-          <Button type="submit" pracuje={isSubmitting} className="mt-2 w-full">
+          <Button ref={odoslatRef} type="submit" pracuje={isSubmitting} className="mt-2 w-full">
             Prihlásiť sa
           </Button>
         </form>
@@ -161,7 +169,7 @@ export function Prihlasenie() {
           V ukážkovej verzii sa môžete prihlásiť ako demo občan: {DEMO_UCTY.obcan.email}, heslo{' '}
           {DEMO_UCTY.obcan.heslo}.
         </p>
-        <Button variant="secondary" size="sm" className="mt-3" onClick={predvyplnitDemo}>
+        <Button variant="secondary" className="mt-3 w-full sm:w-auto" onClick={predvyplnitDemo}>
           Predvyplniť demo prístup
         </Button>
       </Alert>
